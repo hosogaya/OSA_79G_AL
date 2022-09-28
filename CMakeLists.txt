@@ -21,4 +21,14 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+add_executable(osa_79g_al src/osa_79g_al.cpp src/main.cpp)
+ament_target_dependencies(osa_79g_al rclcpp std_msgs)
+target_include_directories(osa_79g_al
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+install(
+  TARGETS osa_79g_al
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
