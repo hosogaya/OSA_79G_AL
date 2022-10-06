@@ -22,12 +22,22 @@ OSA79GAL::OSA79GAL(const char* _device_name) : Node("osa_79g_al")
         RCLCPP_ERROR(this->get_logger(), "Connection failed: could not open %s", _device_name);
         exit(1);
     }
-    publisher_ = this->create_publisher<tracker_msg::msg::Tracker>(
-        "/osa_79g_al_tracker", 1
-    );
+    // send command to start uart communication
+    char command[] = "ar 1 2 0\n";
+    write(fd1_, command, sizeof(command));
+
+    // publisher_ = this->create_publisher<tracker_msg::msg::TrackerArray>(
+    //     "/osa_79g_al_tracker", 1
+    // );
     timer_ = this->create_wall_timer(
         100ms, std::bind(&OSA79GAL::timerCallback, this)
     );
+}
+
+OSA79GAL::~OSA79GAL() {
+    char command[] = "p";
+    write(fd1_, command, sizeof(command));
+    close(fd1_);
 }
 
 int OSA79GAL::openSerial(const char* _device_name) {    
@@ -82,7 +92,7 @@ void OSA79GAL::timerCallback()
         // create container
         
         // substitute data
-        data = data.substr(2);
+        data = data.substr(3);
         std::string d;
         for (int i = 0; i < num; ++i) {
             d = data.substr(point_size_*i, point_size_); // retrieve point

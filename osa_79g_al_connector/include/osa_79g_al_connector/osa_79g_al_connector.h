@@ -9,17 +9,18 @@
 #include <fcntl.h>
 #include <termios.h>
 
-#include <tracker_msg/msg/tracker.hpp>
+#include <tracker_array_msg/msg/tracker_array.hpp>
 
 class OSA79GAL : public rclcpp::Node {
     public:
         OSA79GAL(const char* _device_name);
+        ~OSA79GAL();
 
     private:
         /* for ros */
         void timerCallback();
         rclcpp::TimerBase::SharedPtr timer_;
-        rclcpp::Publisher<tracker_msg::msg::Tracker>::SharedPtr publisher_;
+        // rclcpp::Publisher<tracker_msg::msg::Tracker>::SharedPtr publisher_;
 
 
         /* for uart communication */
