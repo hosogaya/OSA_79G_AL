@@ -17,18 +17,24 @@ using namespace std::chrono_literals;
 
 OSA79GAL::OSA79GAL(const char* _device_name) : Node("osa_79g_al")
 {
+    declare_parameter("x_range", "20.0");
+    declare_parameter("y_range", "30.0");
+
+    std::string command_x = "stx " + get_parameter("x_range").as_string() + "\n";
+    std::string command_y = "sty " + get_parameter("y_range").as_string() + "\n";
+    RCLCPP_INFO(this->get_logger(), "x range: %s", command_x.c_str());
+    RCLCPP_INFO(this->get_logger(), "y range: %s", command_y.c_str());
+
+    /* open serial port */
     fd1_ = this->openSerial(_device_name);
     if (fd1_ < 0) {
         RCLCPP_ERROR(this->get_logger(), "Connection failed: could not open %s", _device_name);
         exit(1);
     }
-    // send command to start uart communication
-    char command[] = "ar 1 2 0\n";
-    write(fd1_, command, sizeof(command));
 
-    // publisher_ = this->create_publisher<tracker_msg::msg::TrackerArray>(
-    //     "/osa_79g_al_tracker", 1
-    // );
+    publisher_ = this->create_publisher<tracker_array_msg::msg::TrackerArray>(
+        "/osa_79g_al_trackers", 1
+    );
     timer_ = this->create_wall_timer(
         100ms, std::bind(&OSA79GAL::timerCallback, this)
     );
@@ -63,9 +69,14 @@ int OSA79GAL::openSerial(const char* _device_name) {
 }
 
 void OSA79GAL::setupSensor() {
-    /* send start command */
-
+    // send command to start uart communication
+    char command[] = "ar 1 2 0\n";
+    write(fd1_, command, sizeof(command));
     /* send setting x,y */
+    std::string command_x = "stx " + get_parameter("x_range").as_string() + "\n";
+    std::string command_y = "sty " + get_parameter("y_range").as_string() + "\n";
+    write(fd1_, command_x.c_str(), command_x.size());
+    write(fd1_, command_y.c_str(), command_y.size());
 }
 
 void OSA79GAL::timerCallback() 
@@ -90,23 +101,29 @@ void OSA79GAL::timerCallback()
         else RCLCPP_INFO(this->get_logger(), "Get %d trackers.", num);
 
         // create container
+        tracker_array_msg::msg::TrackerArray msg;
+        msg.num = num;
+        msg.data.resize(num);
         
         // substitute data
         data = data.substr(3);
         std::string d;
         for (int i = 0; i < num; ++i) {
             d = data.substr(point_size_*i, point_size_); // retrieve point
-            int id = stoi(d.substr(index.id.ind, index.id.size));
-            float x = static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f;
-            float y = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
-            float vx = static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
-            float vy = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
-            float ax = static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
-            float ay = static_cast<float>(stoi(d.substr(index.ay.ind, index.ay.size)))*0.1f;
+            msg.data[i].id = stoi(d.substr(index.id.ind, index.id.size));
+            msg.data[i].x = static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f;
+            msg.data[i].y = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
+            msg.data[i].vx = static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
+            msg.data[i].vy = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
+            msg.data[i].ax = static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
+            msg.data[i].ay = static_cast<float>(stoi(d.substr(index.ay.ind, index.ay.size)))*0.1f;
             float gain = static_cast<float>(stoi(d.substr(index.gain.ind, index.gain.size)))*0.1f;
             float power = static_cast<float>(stoi(d.substr(index.power.ind, index.power.size)))*0.1f;
         
-            RCLCPP_INFO(this->get_logger(), "id: %d, x: %f, y: %f, vx: %f, vy: %f, ax: %f, ay: %f, gain: %f, power: %f", id, x, y, vx, vy, ax, ay, gain, power);
+            RCLCPP_INFO(this->get_logger(), "id: %d, x: %f, y: %f, vx: %f, vy: %f, ax: %f, ay: %f, gain: %f, power: %f", 
+                msg.data[i].id, msg.data[i].x, msg.data[i].y, msg.data[i].vx, msg.data[i].vy, msg.data[i].ax, msg.data[i].ay, gain, power);
         }
+
+        publisher_->publish(msg);
     }
 }

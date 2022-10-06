@@ -1,1 +1,5 @@
 # range of front sensor
+/**:
+  ros__parameters:
+    x_range: "20" # input as string, 0.5~20m, steps = 0.5
+    y_range: "30" # input as string, 1~30m, steps = 1

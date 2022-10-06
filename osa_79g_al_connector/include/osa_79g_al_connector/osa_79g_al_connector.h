@@ -20,7 +20,7 @@ class OSA79GAL : public rclcpp::Node {
         /* for ros */
         void timerCallback();
         rclcpp::TimerBase::SharedPtr timer_;
-        // rclcpp::Publisher<tracker_msg::msg::Tracker>::SharedPtr publisher_;
+        rclcpp::Publisher<tracker_array_msg::msg::TrackerArray>::SharedPtr publisher_;
 
 
         /* for uart communication */
