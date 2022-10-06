@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>osa_79g_al</name>
+  <name>osa_79g_al_connector</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="hosogaya.hirotaka.z7@s.mail.nagoya-u.ac.jp">hosogaya</maintainer>
@@ -11,6 +11,7 @@
 
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>tracker_array_msg</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

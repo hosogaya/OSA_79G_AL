@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(osa_79g_al)
+project(tracker_array_msg)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -8,7 +8,16 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
+find_package(tracker_msg REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/TrackerArray.msg"
+  DEPENDENCIES
+    tracker_msg
+)
+
+ament_export_dependencies(rosidl_default_runtime)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -20,15 +29,5 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-add_executable(osa_79g_al src/osa_79g_al.cpp src/main.cpp)
-ament_target_dependencies(osa_79g_al rclcpp std_msgs)
-target_include_directories(osa_79g_al
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-install(
-  TARGETS osa_79g_al
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 ament_package()

@@ -1,5 +1,5 @@
 /**
- * @file osa_79g_al.cpp
+ * @file osa_79g_al_connector.cpp
  * @author Hirotaka Hosogaya (hosogaya.hirotaka.z7@s.mail.nagoya-u.ac.jp)
  * @brief This code retrieve data from OSA-79G-AL (https://www.akasakatec.com/products/hardware/mm-wave-radar-module/).
  *        This code is written by reference to  https://qiita.com/srs/items/efaa8dc0a6d580c7c423 .
@@ -9,7 +9,7 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#include <osa_79g_al/osa_79g_al.h>
+#include <osa_79g_al_connector/osa_79g_al_connector.h>
 
 
 // To simplify timer definition
@@ -22,6 +22,9 @@ OSA79GAL::OSA79GAL(const char* _device_name) : Node("osa_79g_al")
         RCLCPP_ERROR(this->get_logger(), "Connection failed: could not open %s", _device_name);
         exit(1);
     }
+    publisher_ = this->create_publisher<tracker_msg::msg::Tracker>(
+        "/osa_79g_al_tracker", 1
+    );
     timer_ = this->create_wall_timer(
         100ms, std::bind(&OSA79GAL::timerCallback, this)
     );
@@ -59,6 +62,7 @@ void OSA79GAL::timerCallback()
 {
     char buff[256] = {0};
     int recv_data = read(fd1_, buff, sizeof(buff));
+    RCLCPP_INFO(this->get_logger(), "Received %d data", recv_data);
     if (recv_data > 0) {
         std::string data = buff;
         // find magic word

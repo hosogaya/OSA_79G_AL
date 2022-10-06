@@ -2,11 +2,14 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <string>
+#include <vector>
 #include <chrono>
 
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
+
+#include <tracker_msg/msg/tracker.hpp>
 
 class OSA79GAL : public rclcpp::Node {
     public:
@@ -16,6 +19,8 @@ class OSA79GAL : public rclcpp::Node {
         /* for ros */
         void timerCallback();
         rclcpp::TimerBase::SharedPtr timer_;
+        rclcpp::Publisher<tracker_msg::msg::Tracker>::SharedPtr publisher_;
+
 
         /* for uart communication */
         int openSerial(const char* _device_name);
