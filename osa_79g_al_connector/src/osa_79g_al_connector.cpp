@@ -15,22 +15,26 @@
 // To simplify timer definition
 using namespace std::chrono_literals;
 
-OSA79GAL::OSA79GAL(const char* _device_name) : Node("osa_79g_al")
+OSA79GAL::OSA79GAL() : Node("osa_79g_al")
 {
     declare_parameter("x_range", "20.0");
     declare_parameter("y_range", "30.0");
+    declare_parameter("device_name", "/dev/ttyUSB0");
 
     std::string command_x = "stx " + get_parameter("x_range").as_string() + "\n";
     std::string command_y = "sty " + get_parameter("y_range").as_string() + "\n";
+    device_name_ = get_parameter("device_name").as_string();
     RCLCPP_INFO(this->get_logger(), "x range: %s", command_x.c_str());
     RCLCPP_INFO(this->get_logger(), "y range: %s", command_y.c_str());
+    RCLCPP_INFO(this->get_logger(), "device_name: %s", device_name_.c_str());
 
     /* open serial port */
-    fd1_ = this->openSerial(_device_name);
+    fd1_ = this->openSerial(device_name_.c_str());
     if (fd1_ < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Connection failed: could not open %s", _device_name);
+        RCLCPP_ERROR(this->get_logger(), "Connection failed: could not open %s", device_name_.c_str());
         exit(1);
     }
+    setupSensor();
 
     publisher_ = this->create_publisher<tracker_array_msg::msg::TrackerArray>(
         "/osa_79g_al_trackers", 1
@@ -82,9 +86,9 @@ void OSA79GAL::setupSensor() {
 void OSA79GAL::timerCallback() 
 {
     char buff[256] = {0};
-    int recv_data = read(fd1_, buff, sizeof(buff));
-    RCLCPP_INFO(this->get_logger(), "Received %d data", recv_data);
-    if (recv_data > 0) {
+    size_t recv_data_size = read(fd1_, buff, sizeof(buff));
+    RCLCPP_INFO(this->get_logger(), "Received %d data", recv_data_size);
+    if (recv_data_size > 0) {
         std::string data = buff;
         // find magic word
         int m = data.find(magic_word_);
@@ -110,6 +114,7 @@ void OSA79GAL::timerCallback()
         std::string d;
         for (int i = 0; i < num; ++i) {
             d = data.substr(point_size_*i, point_size_); // retrieve point
+            if (d.size() != point_size_) continue; // check data size
             msg.data[i].id = stoi(d.substr(index.id.ind, index.id.size));
             msg.data[i].x = static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f;
             msg.data[i].y = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;

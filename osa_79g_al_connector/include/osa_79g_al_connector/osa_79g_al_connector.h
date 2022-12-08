@@ -13,7 +13,7 @@
 
 class OSA79GAL : public rclcpp::Node {
     public:
-        OSA79GAL(const char* _device_name);
+        OSA79GAL();
         ~OSA79GAL();
 
     private:
@@ -24,6 +24,7 @@ class OSA79GAL : public rclcpp::Node {
 
 
         /* for uart communication */
+        std::string device_name_;
         int openSerial(const char* _device_name);
         void setupSensor();
 

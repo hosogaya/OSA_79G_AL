@@ -22,3 +22,10 @@ float32 vy
 float32 ax # acceleration
 float32 ay
 ```
+
+# Error 
+```sh
+[osa_79g_al_connector-1] terminate called after throwing an instance of 'std::invalid_argument'
+[osa_79g_al_connector-1]   what():  stoi
+[ERROR] [osa_79g_al_connector-1]: process has died [pid 25426, exit code -6, cmd '/home/autoware/ros2_ws/install/osa_79g_al_connector/lib/osa_79g_al_connector/osa_79g_al_connector --ros-args -r __node:=osa_79g_al --params-file /tmp/launch_params_bqksph1i'].
+```
