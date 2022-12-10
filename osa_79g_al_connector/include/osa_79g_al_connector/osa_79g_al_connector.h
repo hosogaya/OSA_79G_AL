@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <termios.h>
 
-#include <tracker_array_msg/msg/tracker_array.hpp>
+#include <front_mill_wave_sensor_msg/msg/tracker_array.hpp>
 
 class OSA79GAL : public rclcpp::Node {
     public:
@@ -20,8 +20,11 @@ class OSA79GAL : public rclcpp::Node {
         /* for ros */
         void timerCallback();
         rclcpp::TimerBase::SharedPtr timer_;
-        rclcpp::Publisher<tracker_array_msg::msg::TrackerArray>::SharedPtr publisher_;
+        rclcpp::Publisher<front_mill_wave_sensor_msg::msg::TrackerArray>::SharedPtr publisher_;
 
+        /* for string */
+        std::string getSubString(std::string& data, const size_t begin);
+        std::string getSubString(std::string& data, const size_t begin, const size_t end);
 
         /* for uart communication */
         std::string device_name_;
@@ -31,7 +34,7 @@ class OSA79GAL : public rclcpp::Node {
         int fd1_;
         const std::string magic_word_ = "GTRACKER";
         const std::string platform_ = "AR77";
-        const int point_size_ = 51;
+        const size_t point_size_ = 51;
 
         typedef struct {
             int ind;

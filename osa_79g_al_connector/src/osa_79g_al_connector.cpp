@@ -36,7 +36,7 @@ OSA79GAL::OSA79GAL() : Node("osa_79g_al")
     }
     setupSensor();
 
-    publisher_ = this->create_publisher<tracker_array_msg::msg::TrackerArray>(
+    publisher_ = this->create_publisher<front_mill_wave_sensor_msg::msg::TrackerArray>(
         "/osa_79g_al_trackers", 1
     );
     timer_ = this->create_wall_timer(
@@ -87,48 +87,113 @@ void OSA79GAL::timerCallback()
 {
     char buff[256] = {0};
     size_t recv_data_size = read(fd1_, buff, sizeof(buff));
-    RCLCPP_INFO(this->get_logger(), "Received %d data", recv_data_size);
-    if (recv_data_size > 0) {
+    RCLCPP_INFO(this->get_logger(), "Received %d data", static_cast<int>(recv_data_size));
+    if (recv_data_size >= point_size_+magic_word_.size()) {
         std::string data = buff;
         // find magic word
-        int m = data.find(magic_word_);
+        size_t m = data.find(magic_word_);
         if (m == std::string::npos) return;
-        else data = data.substr(m+magic_word_.size());
+        else data = getSubString(data, m+magic_word_.size());
         // find platform 
-        int p = data.find(platform_);
+        size_t p = data.find(platform_);
         if (p == std::string::npos) return;
-        else data = data.substr(p + platform_.size());
+        else data = getSubString(data, p+platform_.size());
 
         // get tracker num
-        int num = stoi(data.substr(1, 2));
-        if (num < 0) return;
-        else RCLCPP_INFO(this->get_logger(), "Get %d trackers.", num);
+        int num = stoi(getSubString(data, 1, 2));
+        if (num <= 0) return;
 
         // create container
-        tracker_array_msg::msg::TrackerArray msg;
+        front_mill_wave_sensor_msg::msg::TrackerArray msg, valid_msg;
         msg.num = num;
         msg.data.resize(num);
         
+
         // substitute data
-        data = data.substr(3);
+        data = getSubString(data, 3);
         std::string d;
+        int valid_num = num;
+        std::vector<bool> valid;
+        valid.resize(num);
         for (int i = 0; i < num; ++i) {
-            d = data.substr(point_size_*i, point_size_); // retrieve point
-            if (d.size() != point_size_) continue; // check data size
-            msg.data[i].id = stoi(d.substr(index.id.ind, index.id.size));
-            msg.data[i].x = static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f;
-            msg.data[i].y = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
-            msg.data[i].vx = static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
-            msg.data[i].vy = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
-            msg.data[i].ax = static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
-            msg.data[i].ay = static_cast<float>(stoi(d.substr(index.ay.ind, index.ay.size)))*0.1f;
-            float gain = static_cast<float>(stoi(d.substr(index.gain.ind, index.gain.size)))*0.1f;
-            float power = static_cast<float>(stoi(d.substr(index.power.ind, index.power.size)))*0.1f;
-        
-            RCLCPP_INFO(this->get_logger(), "id: %d, x: %f, y: %f, vx: %f, vy: %f, ax: %f, ay: %f, gain: %f, power: %f", 
-                msg.data[i].id, msg.data[i].x, msg.data[i].y, msg.data[i].vx, msg.data[i].vy, msg.data[i].ax, msg.data[i].ay, gain, power);
+            try {
+                d = data.substr(point_size_*i, point_size_); // retrieve point
+
+                msg.data[i].id = stoi(d.substr(index.id.ind, index.id.size));
+                msg.data[i].x = static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f; // [dm -> m]
+                msg.data[i].y = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
+                msg.data[i].vx = static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
+                msg.data[i].vy = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
+                msg.data[i].ax = static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
+                msg.data[i].ay = static_cast<float>(stoi(d.substr(index.ay.ind, index.ay.size)))*0.1f;
+                float gain = static_cast<float>(stoi(d.substr(index.gain.ind, index.gain.size)))*0.1f;
+                float power = static_cast<float>(stoi(d.substr(index.power.ind, index.power.size)))*0.1f;
+            
+                RCLCPP_INFO(this->get_logger(), "id: %d, x: %f, y: %f, vx: %f, vy: %f, ax: %f, ay: %f, gain: %f, power: %f", 
+                    msg.data[i].id, msg.data[i].x, msg.data[i].y, msg.data[i].vx, msg.data[i].vy, msg.data[i].ax, msg.data[i].ay, gain, power);
+
+                valid[i] = true;
+            }
+            catch (const std::invalid_argument& e)
+            {
+                RCLCPP_INFO(this->get_logger(), e.what());
+                valid[i] = false;
+                --valid_num;
+            }
+            catch (const std::out_of_range& e) {
+                RCLCPP_INFO(this->get_logger(), e.what());
+                valid[i] = false;
+                --valid_num;
+            }
+        }
+
+        int ind = 0;
+        if (valid_num <= 0) return;
+        valid_msg.num = valid_num;
+        valid_msg.data.resize(valid_num);
+        for (int i=0; i<valid_num; ++i) {
+            if (!valid[i]) continue;
+            
+            valid_msg.data[ind] = msg.data[i];
+            ++ind;
         }
 
         publisher_->publish(msg);
     }
+}
+
+std::string OSA79GAL::getSubString(std::string& data, const size_t begin) {
+    try
+    {
+        std::string d = data.substr(begin);
+        return d;
+    }
+    catch (const std::invalid_argument& e)
+    {
+        RCLCPP_INFO(this->get_logger(), e.what());
+        return "";
+    }
+    catch (const std::out_of_range& e) {
+        RCLCPP_INFO(this->get_logger(), e.what());
+        return "";
+    }
+    return "";
+}
+
+std::string OSA79GAL::getSubString(std::string& data, const size_t begin, const size_t end) {
+    try
+    {
+        std::string d = data.substr(begin, end);
+        return d;
+    }
+    catch (const std::invalid_argument& e)
+    {
+        RCLCPP_INFO(this->get_logger(), e.what());
+        return "";
+    }
+    catch (const std::out_of_range& e) {
+        RCLCPP_INFO(this->get_logger(), e.what());
+        return "";
+    }
+    return "";
 }

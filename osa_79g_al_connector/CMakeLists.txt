@@ -9,7 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(tracker_array_msg REQUIRED)
+find_package(front_mill_wave_sensor_msg REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -23,7 +23,7 @@ if(BUILD_TESTING)
 endif()
 
 add_executable(osa_79g_al_connector src/osa_79g_al_connector.cpp src/main.cpp)
-ament_target_dependencies(osa_79g_al_connector rclcpp std_msgs tracker_array_msg)
+ament_target_dependencies(osa_79g_al_connector rclcpp std_msgs front_mill_wave_sensor_msg)
 target_include_directories(osa_79g_al_connector
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
