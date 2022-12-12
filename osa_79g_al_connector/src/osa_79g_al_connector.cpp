@@ -36,9 +36,13 @@ OSA79GAL::OSA79GAL() : Node("osa_79g_al")
     }
     setupSensor();
 
-    publisher_ = this->create_publisher<front_mill_wave_sensor_msg::msg::TrackerArray>(
-        "/osa_79g_al_trackers", 1
+    tracker_pub_ = this->create_publisher<front_mill_wave_sensor_msg::msg::TrackerArray>(
+        "/front_milli_wave_sensor_trackers", 1
     );
+    marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray> (
+        "/front_milli_wave_sensor_marker_array", 1
+    );
+    // pub_marker_msg_
     timer_ = this->create_wall_timer(
         100ms, std::bind(&OSA79GAL::timerCallback, this)
     );
@@ -104,7 +108,7 @@ void OSA79GAL::timerCallback()
         if (num <= 0) return;
 
         // create container
-        front_mill_wave_sensor_msg::msg::TrackerArray msg, valid_msg;
+        front_mill_wave_sensor_msg::msg::TrackerArray msg;
         msg.num = num;
         msg.data.resize(num);
         
@@ -148,18 +152,44 @@ void OSA79GAL::timerCallback()
         }
 
         int ind = 0;
+        float radius = 0.4f;
+        front_mill_wave_sensor_msg::msg::TrackerArray  valid_msg;
+        visualization_msgs::msg::MarkerArray marker_array_msg;
         if (valid_num <= 0) return;
         valid_msg.num = valid_num;
         valid_msg.data.resize(valid_num);
+        marker_array_msg.markers.resize(valid_num);
+
         for (int i=0; i<valid_num; ++i) {
             if (!valid[i]) continue;
             
             valid_msg.data[ind] = msg.data[i];
+            marker_array_msg.markers[ind].header.frame_id = "map";
+            marker_array_msg.markers[ind].header.stamp = this->now();
+            marker_array_msg.markers[ind].ns = "front_milli_wave_sensor";
+            marker_array_msg.markers[ind].id = msg.data[i].id;
+            marker_array_msg.markers[ind].type = visualization_msgs::msg::Marker::CYLINDER;
+            marker_array_msg.markers[ind].action = visualization_msgs::msg::Marker::ADD;
+            marker_array_msg.markers[ind].pose.position.x = msg.data[i].x;
+            marker_array_msg.markers[ind].pose.position.y = msg.data[i].y;
+            marker_array_msg.markers[ind].pose.position.z = 0.0f;
+            marker_array_msg.markers[ind].pose.orientation.x = 0.0f;
+            marker_array_msg.markers[ind].pose.orientation.y = 0.0f;
+            marker_array_msg.markers[ind].pose.orientation.z = 0.0f;
+            marker_array_msg.markers[ind].pose.orientation.w = 1.0f;
+            marker_array_msg.markers[ind].scale.x = radius;
+            marker_array_msg.markers[ind].scale.y = radius;
+            marker_array_msg.markers[ind].scale.z = 1.8f;
+            marker_array_msg.markers[ind].color.a = 0.5f;
+            marker_array_msg.markers[ind].color.r = 1.0f;
+            marker_array_msg.markers[ind].color.g = 0.0f;
+            marker_array_msg.markers[ind].color.b = 0.0f;
             ++ind;
         }
 
-        publisher_->publish(msg);
-    }
+        tracker_pub_->publish(valid_msg);
+        marker_pub_->publish(marker_array_msg);
+    }// end if (recv_data_size > 0)
 }
 
 std::string OSA79GAL::getSubString(std::string& data, const size_t begin) {

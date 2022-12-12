@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <termios.h>
 
+#include <visualization_msgs/msg/marker_array.hpp>
 #include <front_mill_wave_sensor_msg/msg/tracker_array.hpp>
 
 class OSA79GAL : public rclcpp::Node {
@@ -20,7 +21,8 @@ class OSA79GAL : public rclcpp::Node {
         /* for ros */
         void timerCallback();
         rclcpp::TimerBase::SharedPtr timer_;
-        rclcpp::Publisher<front_mill_wave_sensor_msg::msg::TrackerArray>::SharedPtr publisher_;
+        rclcpp::Publisher<front_mill_wave_sensor_msg::msg::TrackerArray>::SharedPtr tracker_pub_;
+        rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 
         /* for string */
         std::string getSubString(std::string& data, const size_t begin);
