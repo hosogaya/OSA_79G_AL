@@ -140,8 +140,8 @@ void OSA79GAL::timerCallback()
                 d = data.substr(point_size_*i, point_size_); // retrieve point
 
                 msg.data[i].id = stoi(d.substr(index.id.ind, index.id.size));
-                msg.data[i].y = -static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f; // [dm -> m]
-                msg.data[i].x = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
+                msg.data[i].y = -static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f + pose_.position.x; // [dm -> m]
+                msg.data[i].x = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f + pose_.position.y;
                 msg.data[i].vy = -static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
                 msg.data[i].vx = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
                 msg.data[i].ay = -static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
@@ -180,7 +180,10 @@ void OSA79GAL::timerCallback()
             if (!valid[i]) continue;
             
             valid_msg.data[ind] = msg.data[i];
-            marker_array_msg.markers[ind].header.frame_id = "map";
+            valid_msg.header.frame_id = frame_;
+            valid_msg.header.stamp = this->now();
+
+            marker_array_msg.markers[ind].header.frame_id = frame_;
             marker_array_msg.markers[ind].header.stamp = this->now();
             marker_array_msg.markers[ind].ns = "front_milli_wave_sensor";
             marker_array_msg.markers[ind].id = msg.data[i].id;
