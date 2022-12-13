@@ -49,8 +49,8 @@ OSA79GAL::OSA79GAL() : Node("osa_79g_al")
 }
 
 OSA79GAL::~OSA79GAL() {
-    char command[] = "p";
-    write(fd1_, command, sizeof(command));
+    // char command[] = "p\n";
+    // write(fd1_, command, sizeof(command));
     close(fd1_);
 }
 
@@ -124,12 +124,12 @@ void OSA79GAL::timerCallback()
                 d = data.substr(point_size_*i, point_size_); // retrieve point
 
                 msg.data[i].id = stoi(d.substr(index.id.ind, index.id.size));
-                msg.data[i].x = static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f; // [dm -> m]
-                msg.data[i].y = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
-                msg.data[i].vx = static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
-                msg.data[i].vy = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
-                msg.data[i].ax = static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
-                msg.data[i].ay = static_cast<float>(stoi(d.substr(index.ay.ind, index.ay.size)))*0.1f;
+                msg.data[i].y = -static_cast<float>(stoi(d.substr(index.x.ind, index.x.size)))*0.1f; // [dm -> m]
+                msg.data[i].x = static_cast<float>(stoi(d.substr(index.y.ind, index.y.size)))*0.1f;
+                msg.data[i].vy = -static_cast<float>(stoi(d.substr(index.vx.ind, index.vx.size)))*0.1f;
+                msg.data[i].vx = static_cast<float>(stoi(d.substr(index.vy.ind, index.vy.size)))*0.1f;
+                msg.data[i].ay = -static_cast<float>(stoi(d.substr(index.ax.ind, index.ax.size)))*0.1f;
+                msg.data[i].ax = static_cast<float>(stoi(d.substr(index.ay.ind, index.ay.size)))*0.1f;
                 float gain = static_cast<float>(stoi(d.substr(index.gain.ind, index.gain.size)))*0.1f;
                 float power = static_cast<float>(stoi(d.substr(index.power.ind, index.power.size)))*0.1f;
             
@@ -172,22 +172,22 @@ void OSA79GAL::timerCallback()
             marker_array_msg.markers[ind].action = visualization_msgs::msg::Marker::ADD;
             marker_array_msg.markers[ind].pose.position.x = msg.data[i].x;
             marker_array_msg.markers[ind].pose.position.y = msg.data[i].y;
-            marker_array_msg.markers[ind].pose.position.z = 0.0f;
+            marker_array_msg.markers[ind].pose.position.z = 0.5f;
             marker_array_msg.markers[ind].pose.orientation.x = 0.0f;
             marker_array_msg.markers[ind].pose.orientation.y = 0.0f;
             marker_array_msg.markers[ind].pose.orientation.z = 0.0f;
             marker_array_msg.markers[ind].pose.orientation.w = 1.0f;
             marker_array_msg.markers[ind].scale.x = radius;
             marker_array_msg.markers[ind].scale.y = radius;
-            marker_array_msg.markers[ind].scale.z = 1.8f;
+            marker_array_msg.markers[ind].scale.z = 1.0f;
             marker_array_msg.markers[ind].color.a = 0.5f;
             marker_array_msg.markers[ind].color.r = 1.0f;
             marker_array_msg.markers[ind].color.g = 0.0f;
             marker_array_msg.markers[ind].color.b = 0.0f;
-            marker_array_msg.markers[ind].lifetime.sec = 1.0f;
+            marker_array_msg.markers[ind].lifetime.nanosec = 100e6;
             ++ind;
         }
-
+        RCLCPP_INFO(this->get_logger(), " send %ld data", marker_array_msg.markers.size());
         tracker_pub_->publish(valid_msg);
         marker_pub_->publish(marker_array_msg);
     }// end if (recv_data_size > 0)

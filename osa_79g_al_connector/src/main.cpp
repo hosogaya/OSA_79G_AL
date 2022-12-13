@@ -2,7 +2,9 @@
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<OSA79GAL>());
+    {
+        rclcpp::spin(std::make_shared<OSA79GAL>());
+    }
     rclcpp::shutdown();
 
     return 0;
