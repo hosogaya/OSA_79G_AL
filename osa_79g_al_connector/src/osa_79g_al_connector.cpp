@@ -36,7 +36,7 @@ OSA79GAL::OSA79GAL() : Node("osa_79g_al")
     }
     setupSensor();
 
-    tracker_pub_ = this->create_publisher<front_mill_wave_sensor_msg::msg::TrackerArray>(
+    tracker_pub_ = this->create_publisher<front_milli_wave_sensor_msg::msg::TrackerArray>(
         "/front_milli_wave_sensor_trackers", 1
     );
     marker_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray> (
@@ -108,7 +108,7 @@ void OSA79GAL::timerCallback()
         if (num <= 0) return;
 
         // create container
-        front_mill_wave_sensor_msg::msg::TrackerArray msg;
+        front_milli_wave_sensor_msg::msg::TrackerArray msg;
         msg.num = num;
         msg.data.resize(num);
         
@@ -153,7 +153,7 @@ void OSA79GAL::timerCallback()
 
         int ind = 0;
         float radius = 0.4f;
-        front_mill_wave_sensor_msg::msg::TrackerArray  valid_msg;
+        front_milli_wave_sensor_msg::msg::TrackerArray  valid_msg;
         visualization_msgs::msg::MarkerArray marker_array_msg;
         if (valid_num <= 0) return;
         valid_msg.num = valid_num;
@@ -184,6 +184,7 @@ void OSA79GAL::timerCallback()
             marker_array_msg.markers[ind].color.r = 1.0f;
             marker_array_msg.markers[ind].color.g = 0.0f;
             marker_array_msg.markers[ind].color.b = 0.0f;
+            marker_array_msg.markers[ind].lifetime.sec = 1.0f;
             ++ind;
         }
 
