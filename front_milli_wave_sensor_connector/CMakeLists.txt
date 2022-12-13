@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(osa_79g_al_connector)
+project(front_milli_wave_sensor_connector)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -23,13 +23,13 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-add_executable(osa_79g_al_connector src/osa_79g_al_connector.cpp src/main.cpp)
-ament_target_dependencies(osa_79g_al_connector rclcpp std_msgs front_milli_wave_sensor_msg visualization_msgs)
-target_include_directories(osa_79g_al_connector
+add_executable(front_milli_wave_sensor_connector src/front_milli_wave_sensor_connector.cpp src/main.cpp)
+ament_target_dependencies(front_milli_wave_sensor_connector rclcpp std_msgs front_milli_wave_sensor_msg visualization_msgs)
+target_include_directories(front_milli_wave_sensor_connector
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 install(
-  TARGETS osa_79g_al_connector
+  TARGETS front_milli_wave_sensor_connector
   DESTINATION lib/${PROJECT_NAME}
 )
 

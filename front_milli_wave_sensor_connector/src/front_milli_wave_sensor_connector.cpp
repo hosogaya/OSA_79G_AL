@@ -1,5 +1,5 @@
 /**
- * @file osa_79g_al_connector.cpp
+ * @file front_milli_wave_sensor_connector.cpp
  * @author Hirotaka Hosogaya (hosogaya.hirotaka.z7@s.mail.nagoya-u.ac.jp)
  * @brief This code retrieve data from OSA-79G-AL (https://www.akasakatec.com/products/hardware/mm-wave-radar-module/).
  *        This code is written by reference to  https://qiita.com/srs/items/efaa8dc0a6d580c7c423 .
@@ -9,13 +9,13 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#include <osa_79g_al_connector/osa_79g_al_connector.h>
+#include <front_milli_wave_sensor_connector/front_milli_wave_sensor_connector.h>
 
 
 // To simplify timer definition
 using namespace std::chrono_literals;
 
-OSA79GAL::OSA79GAL() : Node("osa_79g_al")
+OSA79GAL::OSA79GAL() : Node("front_milli_wave_sensor")
 {
     declare_parameter("x_range", "20.0");
     declare_parameter("y_range", "30.0");

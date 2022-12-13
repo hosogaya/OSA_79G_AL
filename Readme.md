@@ -25,7 +25,7 @@ float32 ay
 
 # Error 
 ```sh
-[osa_79g_al_connector-1] terminate called after throwing an instance of 'std::invalid_argument'
-[osa_79g_al_connector-1]   what():  stoi
-[ERROR] [osa_79g_al_connector-1]: process has died [pid 25426, exit code -6, cmd '/home/autoware/ros2_ws/install/osa_79g_al_connector/lib/osa_79g_al_connector/osa_79g_al_connector --ros-args -r __node:=osa_79g_al --params-file /tmp/launch_params_bqksph1i'].
+[front_milli_wave_sensor_connector-1] terminate called after throwing an instance of 'std::invalid_argument'
+[front_milli_wave_sensor_connector-1]   what():  stoi
+[ERROR] [front_milli_wave_sensor_connector-1]: process has died [pid 25426, exit code -6, cmd '/home/autoware/ros2_ws/install/front_milli_wave_sensor_connector/lib/front_milli_wave_sensor_connector/front_milli_wave_sensor_connector --ros-args -r __node:=front_milli_wave_sensor --params-file /tmp/launch_params_bqksph1i'].
 ```

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>osa_79g_al_connector</name>
+  <name>front_milli_wave_sensor_connector</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="hosogaya.hirotaka.z7@s.mail.nagoya-u.ac.jp">hosogaya</maintainer>
