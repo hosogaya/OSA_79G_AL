@@ -20,13 +20,29 @@ OSA79GAL::OSA79GAL() : Node("osa_79g_al")
     declare_parameter("x_range", "20.0");
     declare_parameter("y_range", "30.0");
     declare_parameter("device_name", "/dev/ttyUSB0");
+    declare_parameter("frame", "map");
+    declare_parameter("x", 0.0);
+    declare_parameter("y", 0.0);
+    declare_parameter("z", 0.0);
 
     std::string command_x = "stx " + get_parameter("x_range").as_string() + "\n";
     std::string command_y = "sty " + get_parameter("y_range").as_string() + "\n";
     device_name_ = get_parameter("device_name").as_string();
+    frame_ = get_parameter("frame").as_string();
+    pose_.position.x = get_parameter("x").as_double();
+    pose_.position.y = get_parameter("y").as_double();
+    pose_.position.z = get_parameter("z").as_double();
+    pose_.orientation.x = 0.0f;
+    pose_.orientation.y = 0.0f;
+    pose_.orientation.z = 0.0f;
+    pose_.orientation.w = 1.0f;
     RCLCPP_INFO(this->get_logger(), "x range: %s", command_x.c_str());
     RCLCPP_INFO(this->get_logger(), "y range: %s", command_y.c_str());
     RCLCPP_INFO(this->get_logger(), "device_name: %s", device_name_.c_str());
+    RCLCPP_INFO(this->get_logger(), "frame: %s", frame_.c_str());
+    RCLCPP_INFO(this->get_logger(), "x: %f", pose_.position.x);
+    RCLCPP_INFO(this->get_logger(), "y: %f", pose_.position.y);
+    RCLCPP_INFO(this->get_logger(), "z: %f", pose_.position.z);
 
     /* open serial port */
     fd1_ = this->openSerial(device_name_.c_str());

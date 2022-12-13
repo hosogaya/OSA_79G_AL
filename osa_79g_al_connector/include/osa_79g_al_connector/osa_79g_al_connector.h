@@ -28,6 +28,10 @@ class OSA79GAL : public rclcpp::Node {
         std::string getSubString(std::string& data, const size_t begin);
         std::string getSubString(std::string& data, const size_t begin, const size_t end);
 
+        /** geometric info */
+        std::string frame_;
+        geometry_msgs::msg::Pose pose_;
+
         /* for uart communication */
         std::string device_name_;
         int openSerial(const char* _device_name);
